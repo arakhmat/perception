@@ -216,6 +216,8 @@ public class CameraActivity extends Activity {
                         Ubuffer.get(U);
                         Vbuffer.get(V);
 
+
+
 //                        predictedClass = classificationFromCaffe2(h, w, Y, U, V,
 //                                rowStride, pixelStride, run_HWC);
                         runOnUiThread(new Runnable() {
