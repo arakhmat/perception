@@ -17,11 +17,13 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.util.Size;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -54,28 +56,27 @@ public class CameraActivity extends Activity {
     private AssetManager mgr;
     private boolean processing = false;
     private Image image = null;
-    private boolean run_HWC = false;
 
 
     static {
         System.loadLibrary("native-lib");
     }
 
-//    public native String classificationFromCaffe2(int h, int w, byte[] Y, byte[] U, byte[] V,
-//                                                  int rowStride, int pixelStride, boolean r_hwc);
-//    public native void initCaffe2(AssetManager mgr);
-//    private class SetUpNeuralNetwork extends AsyncTask<Void, Void, Void> {
-//        @Override
-//        protected Void doInBackground(Void[] v) {
-//            try {
-//                initCaffe2(mgr);
-//                predictedClass = "Neural net loaded! Inferring...";
-//            } catch (Exception e) {
-//                Log.d(TAG, "Couldn't load neural network.");
-//            }
-//            return null;
-//        }
-//    }
+    public native String classificationFromCaffe2(int h, int w, byte[] Y, byte[] U, byte[] V,
+                                                  int rowStride, int pixelStride);
+    public native void initCaffe2(AssetManager mgr);
+    private class SetUpNeuralNetwork extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void[] v) {
+            try {
+                initCaffe2(mgr);
+                predictedClass = "Neural net loaded! Inferring...";
+            } catch (Exception e) {
+                Log.d(TAG, "Couldn't load neural network.");
+            }
+            return null;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +85,7 @@ public class CameraActivity extends Activity {
 
         mgr = getResources().getAssets();
 
-//        new SetUpNeuralNetwork().execute();
+        new SetUpNeuralNetwork().execute();
 
         View decorView = getWindow().getDecorView();
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -187,8 +188,8 @@ public class CameraActivity extends Activity {
             assert texture != null;
             texture.setDefaultBufferSize(imageDimension.getWidth(), imageDimension.getHeight());
             Surface surface = new Surface(texture);
-            int width = 227;
-            int height = 227;
+            int width = 128;
+            int height = 128;
             ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 4);
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
@@ -216,14 +217,12 @@ public class CameraActivity extends Activity {
                         Ubuffer.get(U);
                         Vbuffer.get(V);
 
-
-
-//                        predictedClass = classificationFromCaffe2(h, w, Y, U, V,
-//                                rowStride, pixelStride, run_HWC);
+                        predictedClass = classificationFromCaffe2(h, w, Y, U, V,
+                                rowStride, pixelStride);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tv.setText("");
+                                tv.setText(predictedClass);
                                 processing = false;
                             }
                         });
