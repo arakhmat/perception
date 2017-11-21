@@ -57,8 +57,7 @@ void loadToNetDef(AAssetManager* mgr, caffe2::NetDef* net, const char *filename)
     AAsset_close(asset);
 }
 
-extern "C"
-void
+extern "C" void
 Java_nextrev_perception_CameraActivity_initCaffe2(
         JNIEnv* env,
         jobject /* this */,
@@ -69,9 +68,6 @@ Java_nextrev_perception_CameraActivity_initCaffe2(
     loadToNetDef(mgr, &_predictNet,"predict_net.pb");
     alog("Instantiating predictor...");
     _predictor = new caffe2::Predictor(_initNet, _predictNet);
-    alog("%d", ws.Blobs().size());
-    for (auto blob : ws.Blobs())
-        alog("%s", blob.c_str());
     alog("Network Initialized");
 }
 
@@ -141,44 +137,37 @@ Java_nextrev_perception_CameraActivity_classificationFromCaffe2(
             auto g_i_2 = g_i + 2 * (IMG_H * IMG_W * IMG_C);
             auto r_i_2 = r_i + 2 * (IMG_H * IMG_W * IMG_C);
 
-            if (i == iter_h - 1 && j == iter_w - 1) {
-                alog("%d %d %d\n", r_i, g_i, b_i);
-                alog("%d %d %d\n", r_i_1, g_i_1, b_i_1);
-                alog("%d %d %d\n", r_i_2, g_i_2, b_i_2);
-            }
-
-
 /*
   R = Y + 1.402 (V-128)
   G = Y - 0.34414 (U-128) - 0.71414 (V-128)
   B = Y + 1.772 (U-V)
  */
 
-//            input_data[r_i_2] = input_data[r_i_1];
-//            input_data[g_i_2] = input_data[g_i_1];
-//            input_data[b_i_2] = input_data[b_i_1];
-//
-//            input_data[r_i_1] = input_data[r_i];
-//            input_data[g_i_1] = input_data[g_i];
-//            input_data[b_i_1] = input_data[b_i];
+            input_data[r_i_2] = input_data[r_i_1];
+            input_data[g_i_2] = input_data[g_i_1];
+            input_data[b_i_2] = input_data[b_i_1];
+
+            input_data[r_i_1] = input_data[r_i];
+            input_data[g_i_1] = input_data[g_i];
+            input_data[b_i_1] = input_data[b_i];
 
             input_data[r_i] = -r_mean + (float) ((float) min(255., max(0., (float) (y + 1.402 * (v - 128)))));
             input_data[g_i] = -g_mean + (float) ((float) min(255., max(0., (float) (y - 0.34414 * (u - 128) - 0.71414 * (v - 128)))));
             input_data[b_i] = -b_mean + (float) ((float) min(255., max(0., (float) (y + 1.772 * (u - v)))));
 
-//            input_data[r_i] = (input_data[r_i] + 128) / 255;
-//            input_data[g_i] = (input_data[g_i] + 128) / 255;
-//            input_data[b_i] = (input_data[b_i] + 128) / 255;
+            input_data[r_i] = (input_data[r_i] + 128) / 255;
+            input_data[g_i] = (input_data[g_i] + 128) / 255;
+            input_data[b_i] = (input_data[b_i] + 128) / 255;
 
-            if (i == iter_h - 1 && j == iter_w - 1) {
-                alog("%f %f %f\n", input_data[r_i], input_data[g_i], input_data[b_i]);
-                alog("%f %f %f\n", input_data[r_i_1], input_data[g_i_1], input_data[b_i_1]);
-                alog("%f %f %f\n", input_data[r_i_2], input_data[g_i_2], input_data[b_i_2]);
-            }
+//            if (i == iter_h - 1 && j == iter_w - 1) {
+//                alog("%f %f %f\n", input_data[r_i],   input_data[g_i],   input_data[b_i]);
+//                alog("%f %f %f\n", input_data[r_i_1], input_data[g_i_1], input_data[b_i_1]);
+//                alog("%f %f %f\n", input_data[r_i_2], input_data[g_i_2], input_data[b_i_2]);
+//            }
 
         }
     }
-//    alog("Exited for-loop")
+
     caffe2::TensorCPU input;
     input.Resize(std::vector<int>({1, IMG_D, IMG_H, IMG_W}));
 
@@ -187,19 +176,12 @@ Java_nextrev_perception_CameraActivity_classificationFromCaffe2(
     caffe2::Predictor::TensorVector output_vec;
     caffe2::Timer t;
     t.Start();
-    alog("%d %d %d %d\n", IMG_C, IMG_H, IMG_W, IMG_D)
     _predictor->run(input_vec, &output_vec);
     float fps = 1000/t.MilliSeconds();
     total_fps += fps;
     avg_fps = total_fps / iters_fps;
     total_fps -= avg_fps;
-//    alog("Predictor finished")
 
-//    for (auto output : output_vec) {
-//        for (auto i = 0; i < output->size(); ++i) {
-//            alog("%f", output->template data<float>()[i]);
-//        }
-//    }
 
     constexpr int k = 5;
     float max[k] = {0};

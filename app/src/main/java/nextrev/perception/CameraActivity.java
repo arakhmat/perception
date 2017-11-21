@@ -40,7 +40,7 @@ import java.util.Arrays;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
 
 public class CameraActivity extends Activity {
-    private static final String TAG = "F8DEMO";
+    private static final String TAG = "PERCEPTION";
     private static final int REQUEST_CAMERA_PERMISSION = 200;
 
     private TextureView textureView;
