@@ -1,43 +1,50 @@
 package nextrev.perception;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.CheckBox;
 
 public class MainActivity extends Activity {
+
+    private boolean connected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_activity);
 
-        // Example of a call to a native method
-        TextView tv = findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
+        Button cameraActivityButton = findViewById(R.id.camera_activity_button);
+        Button connectButton = findViewById(R.id.connect_button);
+        CheckBox statusCheckbox = findViewById(R.id.status_checkbox);
 
-        Button btn = findViewById(R.id.camera_activity_button);
-
-        btn.setOnClickListener(new View.OnClickListener() {
+        /* Start the Game */
+        cameraActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+            if (connected) {
                 startActivity(new Intent(MainActivity.this, CameraActivity.class));
             }
+            else {
+                new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Error")
+                    .setMessage("Connect to Arduino via Bluetooth first")
+                    .setPositiveButton("ok", null).show();
+            }
+            }
         });
+
+        /* Connect to bluetooth */
+        connectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, BLEScanActivity.class));
+            }
+        });
+
+        statusCheckbox.setChecked(connected);
     }
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-
 }

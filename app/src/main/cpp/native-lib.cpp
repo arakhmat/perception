@@ -1,18 +1,10 @@
 #include <jni.h>
 #include <string>
-
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_nextrev_perception_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
-}
-
 #include <algorithm>
+
 #define PROTOBUF_USE_DLLS 1
 #define CAFFE2_USE_LITE_PROTO 1
+
 #include <caffe2/core/predictor.h>
 #include <caffe2/core/operator.h>
 #include <caffe2/core/timer.h>
@@ -57,8 +49,7 @@ void loadToNetDef(AAssetManager* mgr, caffe2::NetDef* net, const char *filename)
     AAsset_close(asset);
 }
 
-extern "C" void
-Java_nextrev_perception_CameraActivity_initCaffe2(
+extern "C" void Java_nextrev_perception_CameraActivity_initializeNeuralNetwork(
         JNIEnv* env,
         jobject /* this */,
         jobject assetManager) {
@@ -75,9 +66,7 @@ float avg_fps = 0.0;
 float total_fps = 0.0;
 int iters_fps = 10;
 
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_nextrev_perception_CameraActivity_classificationFromCaffe2(
+extern "C" JNIEXPORT jstring JNICALL Java_nextrev_perception_CameraActivity_inferAction(
         JNIEnv *env,
         jobject /* this */,
         jint h, jint w, jbyteArray Y, jbyteArray U, jbyteArray V,

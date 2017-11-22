@@ -44,7 +44,6 @@ public class CameraActivity extends Activity {
     private static final int REQUEST_CAMERA_PERMISSION = 200;
 
     private TextureView textureView;
-    private String cameraId;
     protected CameraDevice cameraDevice;
     protected CameraCaptureSession cameraCaptureSessions;
     protected CaptureRequest.Builder captureRequestBuilder;
@@ -58,18 +57,15 @@ public class CameraActivity extends Activity {
     private Image image = null;
 
 
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-    public native String classificationFromCaffe2(int h, int w, byte[] Y, byte[] U, byte[] V,
+    static {  System.loadLibrary("native-lib");  }
+    public native void initializeNeuralNetwork(AssetManager mgr);
+    public native String inferAction(int h, int w, byte[] Y, byte[] U, byte[] V,
                                                   int rowStride, int pixelStride);
-    public native void initCaffe2(AssetManager mgr);
     private class SetUpNeuralNetwork extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void[] v) {
             try {
-                initCaffe2(mgr);
+                initializeNeuralNetwork(mgr);
                 predictedClass = "Neural net loaded! Inferring...";
             } catch (Exception e) {
                 Log.d(TAG, "Couldn't load neural network.");
@@ -91,9 +87,9 @@ public class CameraActivity extends Activity {
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
 
-        setContentView(R.layout.activity_camera);
+        setContentView(R.layout.camera_activity);
 
-        textureView = (TextureView) findViewById(R.id.textureView);
+        textureView = findViewById(R.id.textureView);
         textureView.setSystemUiVisibility(SYSTEM_UI_FLAG_IMMERSIVE);
         final GestureDetector gestureDetector = new GestureDetector(this.getApplicationContext(),
                 new GestureDetector.SimpleOnGestureListener(){
@@ -128,7 +124,7 @@ public class CameraActivity extends Activity {
 
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
-        tv = (TextView) findViewById(R.id.sample_text);
+        tv = findViewById(R.id.sample_text);
 
     }
 
@@ -152,16 +148,16 @@ public class CameraActivity extends Activity {
     };
     private final CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
-        public void onOpened(CameraDevice camera) {
+        public void onOpened(@NonNull CameraDevice camera) {
             cameraDevice = camera;
             createCameraPreview();
         }
         @Override
-        public void onDisconnected(CameraDevice camera) {
+        public void onDisconnected(@NonNull CameraDevice camera) {
             cameraDevice.close();
         }
         @Override
-        public void onError(CameraDevice camera, int error) {
+        public void onError(@NonNull CameraDevice camera, int error) {
             cameraDevice.close();
             cameraDevice = null;
         }
@@ -207,7 +203,7 @@ public class CameraActivity extends Activity {
                         ByteBuffer Ybuffer = image.getPlanes()[0].getBuffer();
                         ByteBuffer Ubuffer = image.getPlanes()[1].getBuffer();
                         ByteBuffer Vbuffer = image.getPlanes()[2].getBuffer();
-                        // TODO: use these for proper image processing on different formats.
+
                         int rowStride = image.getPlanes()[1].getRowStride();
                         int pixelStride = image.getPlanes()[1].getPixelStride();
                         byte[] Y = new byte[Ybuffer.capacity()];
@@ -217,7 +213,7 @@ public class CameraActivity extends Activity {
                         Ubuffer.get(U);
                         Vbuffer.get(V);
 
-                        predictedClass = classificationFromCaffe2(h, w, Y, U, V,
+                        predictedClass = inferAction(h, w, Y, U, V,
                                 rowStride, pixelStride);
                         runOnUiThread(new Runnable() {
                             @Override
@@ -261,7 +257,7 @@ public class CameraActivity extends Activity {
     private void openCamera() {
         CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
-            cameraId = manager.getCameraIdList()[0];
+            String cameraId = manager.getCameraIdList()[0];
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
