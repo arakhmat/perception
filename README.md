@@ -2,7 +2,7 @@
 Android application for controlling air hockey robot in real-time.
 
 ### How it works
-The application infers the next action of the robot by looking at the last 3 frames obtained from the camera.
+The application infers action that the robot should take by looking at the last 3 frames obtained from the camera.
 Then, it sends the inferred action to Arduino via Bluetooth LE.  
 
 Predictions are made by using a convolutional neural network. The network is pretrained 
