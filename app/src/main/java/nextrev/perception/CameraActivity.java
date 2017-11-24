@@ -40,6 +40,9 @@ import java.util.Arrays;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
 
 public class CameraActivity extends Activity {
+
+    private BLEDevice bleDevice;
+
     private static final String TAG = "PERCEPTION";
     private static final int REQUEST_CAMERA_PERMISSION = 200;
 
@@ -88,6 +91,8 @@ public class CameraActivity extends Activity {
         decorView.setSystemUiVisibility(uiOptions);
 
         setContentView(R.layout.camera_activity);
+
+        bleDevice = ((Perception) this.getApplication()).getBLEDevice();
 
         textureView = findViewById(R.id.textureView);
         textureView.setSystemUiVisibility(SYSTEM_UI_FLAG_IMMERSIVE);
@@ -219,6 +224,7 @@ public class CameraActivity extends Activity {
                             @Override
                             public void run() {
                                 tv.setText(predictedClass);
+                                bleDevice.writeCustomCharacteristic(0xAA);
                                 processing = false;
                             }
                         });

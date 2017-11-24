@@ -17,8 +17,10 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -36,15 +38,17 @@ import java.util.List;
 import java.util.Map;
 
 public class BLEScanActivity extends AppCompatActivity {
+
+    private BLEDevice bleDevice;
     private BluetoothAdapter mBluetoothAdapter;
     private int REQUEST_ENABLE_BT = 1;
     private Handler mHandler;
-    private static final long SCAN_PERIOD = 100000;
+    private static final long SCAN_PERIOD = 1000;
     private BluetoothLeScanner mLEScanner;
     private ScanSettings settings;
     private List<ScanFilter> filters;
-    private BluetoothGatt mGatt;
 
+    ListView devicesListView;
     Map<String, BluetoothDevice> devicesMap;
     List<String> devicesList;
     ArrayAdapter<String> devicesListAdapter;
@@ -53,7 +57,15 @@ public class BLEScanActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.blescan_activity);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
+        bleDevice = ((Perception) this.getApplication()).getBLEDevice();
+
+        ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            ab.setDisplayHomeAsUpEnabled(false);
+            ab.setTitle("BLE Devices:");
+        }
+
 
         mHandler = new Handler();
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -61,11 +73,12 @@ public class BLEScanActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             finish();
         }
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
+        BluetoothManager mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        bleDevice.setBluetoothManager(mBluetoothManager);
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
 
-        ListView devicesListView = (ListView) findViewById(R.id.devices_list_view);
+        devicesListView = (ListView) findViewById(R.id.devices_list_view);
+
         devicesMap = new HashMap<>();
         devicesList = new ArrayList<>();
         devicesListAdapter = new ArrayAdapter<>
@@ -79,19 +92,35 @@ public class BLEScanActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
 
+                /*  If already connected, disconnect */
+                BluetoothGatt mGatt = bleDevice.getBluetoothGatt();
+                if (mGatt != null) {
+                    mGatt.close();
+                    bleDevice.setBluetoothGatt(null);
+                }
+
+                for (int j = 0; j < parent.getChildCount(); j++)
+                    parent.getChildAt(j).setBackgroundColor(Color.TRANSPARENT);
+                view.setBackgroundColor(Color.DKGRAY);
+
                 String deviceName = (String) parent.getItemAtPosition(position);
-                Log.d("Connecting", deviceName);
                 connectToDevice(devicesMap.get(deviceName));
 
             }
 
         });
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        BluetoothGatt mGatt = bleDevice.getBluetoothGatt();
+        if (mGatt != null) {
+            mGatt.close();
+            bleDevice.setBluetoothGatt(null);
+        }
+
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -115,11 +144,6 @@ public class BLEScanActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (mGatt == null) {
-            return;
-        }
-        mGatt.close();
-        mGatt = null;
         super.onDestroy();
     }
 
@@ -135,9 +159,16 @@ public class BLEScanActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                /* Restart Activity */
                 devicesMap.clear();
                 devicesList.clear();
+                for (int j = 0; j < devicesListView.getChildCount(); j++)
+                    devicesListView.getChildAt(j).setBackgroundColor(Color.TRANSPARENT);
+                BluetoothGatt mGatt = bleDevice.getBluetoothGatt();
+                if (mGatt != null) {
+                    mGatt.close();
+                    bleDevice.setBluetoothGatt(null);
+                }
+                scanLeDevice(true);
                 break;
             default:
                 break;
@@ -171,7 +202,6 @@ public class BLEScanActivity extends AppCompatActivity {
         }
     }
 
-
     private ScanCallback mScanCallback = new ScanCallback() {
 
         private void addToDevicesList(ScanResult result) {
@@ -180,6 +210,8 @@ public class BLEScanActivity extends AppCompatActivity {
                 String deviceName = device.getName();
                 if (deviceName == null)
                     deviceName = device.toString();
+                else
+                    deviceName += " (" + device.toString() + ")";
 
                 if (!devicesMap.keySet().contains(deviceName))  {
                     devicesMap.put(deviceName, device);
@@ -209,10 +241,17 @@ public class BLEScanActivity extends AppCompatActivity {
     };
 
     public void connectToDevice(BluetoothDevice device) {
+        BluetoothGatt mGatt = bleDevice.getBluetoothGatt();
+        BluetoothManager mBluetoothManager = bleDevice.getBluetoothManager();
         if (mGatt == null) {
             mGatt = device.connectGatt(this, false, gattCallback);
+            bleDevice.setBluetoothGatt(mGatt);
             scanLeDevice(false);// will stop after first device detection
-            mGatt.getConnectionState(device);
+            mBluetoothManager.getConnectionState(device, BluetoothProfile.GATT);
+        }
+        else {
+            mGatt.close();
+            bleDevice.setBluetoothGatt(mGatt);
         }
     }
 
@@ -259,23 +298,6 @@ public class BLEScanActivity extends AppCompatActivity {
                 default:
                     Log.e("gattCallback", "STATE_OTHER");
             }
-
-        }
-
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            List<BluetoothGattService> services = gatt.getServices();
-            Log.i("onServicesDiscovered", services.toString());
-            gatt.readCharacteristic(services.get(1).getCharacteristics().get
-                    (0));
-        }
-
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic
-                                                 characteristic, int status) {
-            Log.i("onCharacteristicRead", characteristic.toString());
-            gatt.disconnect();
         }
     };
 }
