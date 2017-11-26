@@ -5,13 +5,13 @@ import android.app.Application;
 /* Class for storing global objects */
 public class Perception extends Application {
 
-    private BLEDevice bleDevice;
+    private BluetoothLeDevice bleDevice;
 
     public Perception() {
-        bleDevice = new BLEDevice();
+        bleDevice = new BluetoothLeDevice();
     }
 
-    public BLEDevice getBLEDevice() {
+    public BluetoothLeDevice getBluetoothLeDevice() {
         return bleDevice;
     }
 }

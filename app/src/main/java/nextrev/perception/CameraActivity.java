@@ -41,7 +41,7 @@ import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
 
 public class CameraActivity extends Activity {
 
-    private BLEDevice bleDevice;
+    private BluetoothLeDevice bleDevice;
 
     private static final String TAG = "PERCEPTION";
     private static final int REQUEST_CAMERA_PERMISSION = 200;
@@ -59,10 +59,11 @@ public class CameraActivity extends Activity {
     private boolean processing = false;
     private Image image = null;
 
+    Prediction prediction;
 
     static {  System.loadLibrary("native-lib");  }
     public native void initializeNeuralNetwork(AssetManager mgr);
-    public native String inferAction(int h, int w, byte[] Y, byte[] U, byte[] V,
+    public native Prediction predict(int h, int w, byte[] Y, byte[] U, byte[] V,
                                                   int rowStride, int pixelStride);
     private class SetUpNeuralNetwork extends AsyncTask<Void, Void, Void> {
         @Override
@@ -92,7 +93,7 @@ public class CameraActivity extends Activity {
 
         setContentView(R.layout.camera_activity);
 
-        bleDevice = ((Perception) this.getApplication()).getBLEDevice();
+        bleDevice = ((Perception) this.getApplication()).getBluetoothLeDevice();
 
         textureView = findViewById(R.id.textureView);
         textureView.setSystemUiVisibility(SYSTEM_UI_FLAG_IMMERSIVE);
@@ -129,7 +130,9 @@ public class CameraActivity extends Activity {
 
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
-        tv = findViewById(R.id.sample_text);
+        tv = findViewById(R.id.info_text);
+
+        bleDevice.sendData("AT+BAUDx");
 
     }
 
@@ -218,13 +221,15 @@ public class CameraActivity extends Activity {
                         Ubuffer.get(U);
                         Vbuffer.get(V);
 
-                        predictedClass = inferAction(h, w, Y, U, V,
+                        Log.d(TAG, "Predicting");
+                        prediction = predict(h, w, Y, U, V,
                                 rowStride, pixelStride);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                tv.setText(predictedClass);
-                                bleDevice.writeCustomCharacteristic(0xAA);
+                                Log.d(TAG, "Done predicting");
+                                tv.setText(prediction.getInfo());
+                                bleDevice.sendData(Integer.toString(prediction.getValue()));
                                 processing = false;
                             }
                         });

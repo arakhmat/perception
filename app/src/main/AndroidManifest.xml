@@ -30,7 +30,7 @@
             android:parentActivityName=".MainActivity">
         </activity>
 
-        <activity android:name=".BLEScanActivity"
+        <activity android:name=".BluetoothLeScanActivity"
             android:parentActivityName=".MainActivity">
         </activity>
 

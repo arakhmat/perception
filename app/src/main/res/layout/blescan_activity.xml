@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="nextrev.perception.BLEScanActivity">
+    tools:context="nextrev.perception.BluetoothLeScanActivity">
 
     <ListView
         android:id="@+id/devices_list_view"

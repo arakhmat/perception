@@ -28,15 +28,11 @@ static char raw_data[MAX_DATA_SIZE];
 static float input_data[MAX_DATA_SIZE];
 static caffe2::Workspace ws;
 
-const char * directions_map[] {
-        "NW", "N", "NE",
-        "W", "", "E",
-        "SW", "S", "SE", "Invalid"
+const char * direction[] {
+        "NW", "W", "SW", "N", "", "S", "NE", "E", "SE"
 };
 
-
-// A function to load the NetDefs from protobufs.
-void loadToNetDef(AAssetManager* mgr, caffe2::NetDef* net, const char *filename) {
+void loadCaffe2Net(AAssetManager* mgr, caffe2::NetDef* net, const char *filename) {
     AAsset* asset = AAssetManager_open(mgr, filename, AASSET_MODE_BUFFER);
     assert(asset != nullptr);
     const void *data = AAsset_getBuffer(asset);
@@ -54,25 +50,27 @@ extern "C" void Java_nextrev_perception_CameraActivity_initializeNeuralNetwork(
         jobject /* this */,
         jobject assetManager) {
     AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
-    alog("Attempting to load protobuf netdefs...");
-    loadToNetDef(mgr, &_initNet,   "init_net.pb");
-    loadToNetDef(mgr, &_predictNet,"predict_net.pb");
-    alog("Instantiating predictor...");
+    loadCaffe2Net(mgr, &_initNet,   "init_net.pb");
+    loadCaffe2Net(mgr, &_predictNet,"predict_net.pb");
     _predictor = new caffe2::Predictor(_initNet, _predictNet);
-    alog("Network Initialized");
 }
 
 float avg_fps = 0.0;
 float total_fps = 0.0;
 int iters_fps = 10;
 
-extern "C" JNIEXPORT jstring JNICALL Java_nextrev_perception_CameraActivity_inferAction(
+extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_CameraActivity_predict(
         JNIEnv *env,
         jobject /* this */,
         jint h, jint w, jbyteArray Y, jbyteArray U, jbyteArray V,
         jint rowStride, jint pixelStride) {
+
+    jclass javaClass = env->FindClass("nextrev/perception/Prediction");
+    jmethodID constructor = env->GetMethodID(javaClass, "<init>", "()V");
+    jobject prediction = env->NewObject(javaClass, constructor);
+
     if (!_predictor) {
-        return env->NewStringUTF("Loading...");
+        return prediction;
     }
 
     jsize Y_len = env->GetArrayLength(Y);
@@ -198,7 +196,12 @@ extern "C" JNIEXPORT jstring JNICALL Java_nextrev_perception_CameraActivity_infe
     stringStream << avg_fps << " FPS\n";
 
     for (auto j = 0; j < k; ++j) {
-        stringStream << j << ": " << directions_map[max_index[j]] << " - " << max[j] * 100 << "%\n";
+        stringStream << j << ": " << direction[max_index[j]] << " - " << max[j] * 100 << "%\n";
     }
-    return env->NewStringUTF(stringStream.str().c_str());
+
+    jfieldID value = env->GetFieldID(javaClass, "value", "I");
+    jfieldID info = env->GetFieldID(javaClass, "info", "Ljava/lang/String;");
+    env->SetIntField(prediction, value, max_index[0]);
+    env->SetObjectField(prediction, info, env->NewStringUTF(stringStream.str().c_str()));
+    return prediction;
 }

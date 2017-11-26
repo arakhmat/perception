@@ -17,14 +17,14 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private BLEDevice bleDevice;
+    private BluetoothLeDevice bleDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        bleDevice = ((Perception) this.getApplication()).getBLEDevice();
+        bleDevice = ((Perception) this.getApplication()).getBluetoothLeDevice();
 
         Button cameraActivityButton = findViewById(R.id.camera_activity_button);
         Button connectButton = findViewById(R.id.connect_button);
@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, BLEScanActivity.class));
+                startActivity(new Intent(MainActivity.this, BluetoothLeScanActivity.class));
             }
         });
 

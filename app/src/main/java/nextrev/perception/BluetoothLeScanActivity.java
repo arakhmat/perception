@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -37,9 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BLEScanActivity extends AppCompatActivity {
+public class BluetoothLeScanActivity extends AppCompatActivity {
 
-    private BLEDevice bleDevice;
+    private BluetoothLeDevice bleDevice;
     private BluetoothAdapter mBluetoothAdapter;
     private int REQUEST_ENABLE_BT = 1;
     private Handler mHandler;
@@ -58,14 +56,13 @@ public class BLEScanActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.blescan_activity);
 
-        bleDevice = ((Perception) this.getApplication()).getBLEDevice();
+        bleDevice = ((Perception) this.getApplication()).getBluetoothLeDevice();
 
         ActionBar ab = getSupportActionBar();
         if (ab != null) {
             ab.setDisplayHomeAsUpEnabled(false);
             ab.setTitle("BLE Devices:");
         }
-
 
         mHandler = new Handler();
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -101,7 +98,7 @@ public class BLEScanActivity extends AppCompatActivity {
 
                 for (int j = 0; j < parent.getChildCount(); j++)
                     parent.getChildAt(j).setBackgroundColor(Color.TRANSPARENT);
-                view.setBackgroundColor(Color.DKGRAY);
+                view.setBackgroundColor(Color.LTGRAY);
 
                 String deviceName = (String) parent.getItemAtPosition(position);
                 connectToDevice(devicesMap.get(deviceName));
@@ -254,33 +251,6 @@ public class BLEScanActivity extends AppCompatActivity {
             bleDevice.setBluetoothGatt(mGatt);
         }
     }
-
-//    public boolean writeCharacteristic(){
-//
-//        String TAG = "writeCharacteristic";
-//        //check mBluetoothGatt is available
-//        if (mGatt == null) {
-//            Log.e(TAG, "lost connection");
-//            return false;
-//        }
-//        BluetoothGattService Service = mGatt.getService(your Services);
-//        if (Service == null) {
-//            Log.e(TAG, "service not found!");
-//            return false;
-//        }
-//        BluetoothGattCharacteristic charac = Service
-//                .getCharacteristic(your characteristic);
-//        if (charac == null) {
-//            Log.e(TAG, "char not found!");
-//            return false;
-//        }
-//
-//        byte[] value = new byte[1];
-//        value[0] = (byte) (21 & 0xFF);
-//        charac.setValue(value);
-//        boolean status = mGatt.writeCharacteristic(charac);
-//        return status;
-//    }
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
