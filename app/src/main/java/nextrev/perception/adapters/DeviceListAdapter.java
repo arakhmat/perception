@@ -44,7 +44,7 @@ public class DeviceListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if(convertView == null)
-            view = inflater.inflate(R.layout.list_row, null);
+            view = inflater.inflate(R.layout.device_list_row, null);
 
         TextView name = view.findViewById(R.id.name); // device name
         TextView address = view.findViewById(R.id.address); // device address

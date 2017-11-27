@@ -38,16 +38,14 @@ public class Perception extends Application {
         return mGatt;
     }
 
-    public void setBluetoothGatt(BluetoothGatt mGatt) {
-        this.mGatt = mGatt;
-    }
+    public void setBluetoothGatt(BluetoothGatt mGatt) { this.mGatt = mGatt; }
 
-    public boolean getFlashlightOn() {
+    public boolean flashlightOn() {
         return flashlightOn;
     }
 
-    public void setFlashlightOn(boolean flashlightOn) {
-        this.flashlightOn = flashlightOn;
+    public void toggleFlashlight() {
+        this.flashlightOn = !this.flashlightOn;
     }
 
     public boolean isConnected() {

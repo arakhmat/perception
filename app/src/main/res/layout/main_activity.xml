@@ -5,50 +5,173 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="20dp"
     tools:context="nextrev.perception.activities.MainActivity">
 
-    <CheckBox
-        android:id="@+id/status_checkbox"
-        android:text="Connected"
-        android:layout_width="wrap_content"
+    <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/connect_layout"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:clickable="false"
+        android:orientation="horizontal"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        >
+        <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/connect_relative_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connected:"
+                android:textColor="#040404"
+                android:typeface="sans"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                />
 
-        android:button="@null"
-        android:checked="false"
-        android:drawableRight="@android:drawable/btn_radio"
+            <ImageView
+                android:id="@+id/connect_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_status_disconnected"
+                android:layout_gravity="center"
+                />
+        </GridLayout>
+        <Button
+            android:id="@+id/connect_button"
+            android:text="Connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+    </GridLayout>
 
-        app:layout_constraintHorizontal_bias="0.3"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-
-        app:layout_constraintVertical_bias="0.4"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"  />
-
-
-    <Button
-        android:id="@+id/connect_button"
-        android:text="Connect"
-        android:layout_width="wrap_content"
+    <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/name_layout"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/connect_layout"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Device Name:"
+            android:textColor="#040404"
+            android:typeface="sans"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:minWidth="150dp"
+            />
 
-        app:layout_constraintVertical_bias="0.4"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        <TextView
+            android:id="@+id/name_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:layout_gravity="center"
+            android:textColor="#040404"
+            android:typeface="sans"
+            android:textSize="20sp"
+            />
+    </GridLayout>
 
-        android:layout_marginLeft="20dp"
-        app:layout_constraintLeft_toRightOf="@+id/status_checkbox"
-        />
+
+    <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/address_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/name_layout"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Device Address:"
+            android:layout_gravity="center"
+            android:textColor="#040404"
+            android:typeface="sans"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:minWidth="150dp"
+            />
+
+        <TextView
+            android:id="@+id/address_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="N/A"
+            android:layout_gravity="center"
+            android:textColor="#040404"
+            android:typeface="sans"
+            android:textSize="20sp"
+            />
+    </GridLayout>
+
+
+    <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/flashlight_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/address_layout"
+        >
+        <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/flashlight_relative_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Flashlight:"
+                android:textColor="#040404"
+                android:typeface="sans"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                />
+
+            <ImageView
+                android:id="@+id/flashlight_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_status_disconnected"
+                android:layout_gravity="center"
+                />
+        </GridLayout>
+        <Button
+            android:id="@+id/flashlight_button"
+            android:text="Turn on"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+    </GridLayout>
 
     <Button
         android:id="@+id/camera_activity_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start"
-
-        android:layout_marginTop="40dp"
-        app:layout_constraintTop_toBottomOf="@+id/status_checkbox"
+        android:minWidth="100dp"
+        android:minHeight="100dp"
+        app:layout_constraintTop_toBottomOf="@+id/flashlight_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         />

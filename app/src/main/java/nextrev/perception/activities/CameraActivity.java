@@ -247,7 +247,7 @@ public class CameraActivity extends Activity {
             captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.addTarget(surface);
             captureRequestBuilder.addTarget(reader.getSurface());
-            if (appContext.getFlashlightOn()) {
+            if (appContext.flashlightOn()) {
                 captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
             }
 

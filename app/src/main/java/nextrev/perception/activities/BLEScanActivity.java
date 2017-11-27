@@ -178,7 +178,6 @@ public class BLEScanActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.blescan_activity_actions, menu);
         return super.onCreateOptionsMenu(menu);
@@ -327,17 +326,6 @@ public class BLEScanActivity extends AppCompatActivity {
                                             : STATUS_DISCONNECTED);
                         }
                         deviceListAdapter.notifyDataSetChanged();
-
-//                        if (connectionStatus == BluetoothProfile.STATE_DISCONNECTED) {
-//                            String deviceName = gatt.getDevice().getName();
-//                            if (deviceName == null)
-//                                deviceName = "Unknown Name";
-//                            String deviceAddress = gatt.getDevice().getAddress();
-//                            new AlertDialog.Builder(getA)
-//                                    .setTitle("Connection Failed")
-//                                    .setMessage("Could not connect to " + deviceName + " (" + deviceAddress + ")")
-//                                    .setPositiveButton("ok", null).show();
-//                        }
                     }
                 }
             });
