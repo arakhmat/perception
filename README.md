@@ -6,7 +6,7 @@ The application infers action that the robot should take by looking at the last 
 Then, it sends the inferred action to Arduino via Bluetooth LE.  
 
 Predictions are made by using a convolutional neural network. The network is pretrained 
-with labeled frames generated using [Air Hockey Game Simulator](https://github.com/arakhmat/air-hockey), and then trained via reinforcement learning techniques using [gym-air-hockey](https://github.com/arakhmat/gym-air-hockey) as environment.
+with labeled frames generated using [Air Hockey Game Simulator](https://github.com/arakhmat/air-hockey), and then trained via reinforcement learning techniques using [gym-air-hockey](https://github.com/arakhmat/gym-air-hockey) as environment. The model is convrted from keras to caffe2  using [keras-to-caffe2](https://github.com/arakhmat/keras-to-caffe2)
 ### Prerequisites
 [Android Studio](https://developer.android.com/studio/index.html)
 ### Download
