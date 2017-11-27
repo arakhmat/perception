@@ -28,8 +28,8 @@ static char raw_data[MAX_DATA_SIZE];
 static float input_data[MAX_DATA_SIZE];
 static caffe2::Workspace ws;
 
-const char * direction[] {
-        "NW", "W", "SW", "N", "", "S", "NE", "E", "SE"
+const char * actions[] {
+        "NW", "W", "SW", "N", "Stand", "S", "NE", "E", "SE"
 };
 
 void loadCaffe2Net(AAssetManager* mgr, caffe2::NetDef* net, const char *filename) {
@@ -45,7 +45,7 @@ void loadCaffe2Net(AAssetManager* mgr, caffe2::NetDef* net, const char *filename
     AAsset_close(asset);
 }
 
-extern "C" void Java_nextrev_perception_CameraActivity_initializeNeuralNetwork(
+extern "C" void Java_nextrev_perception_activities_CameraActivity_initializeNeuralNetwork(
         JNIEnv* env,
         jobject /* this */,
         jobject assetManager) {
@@ -59,7 +59,7 @@ float avg_fps = 0.0;
 float total_fps = 0.0;
 int iters_fps = 10;
 
-extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_CameraActivity_predict(
+extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraActivity_predict(
         JNIEnv *env,
         jobject /* this */,
         jint h, jint w, jbyteArray Y, jbyteArray U, jbyteArray V,
@@ -157,11 +157,12 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_CameraActivity_pred
 
     caffe2::TensorCPU input;
     input.Resize(std::vector<int>({1, IMG_D, IMG_H, IMG_W}));
+    memcpy(input.mutable_data<float>(), input_data, IMG_D * IMG_W * IMG_H * sizeof(float));
 
-    memcpy(input.mutable_data<float>(), input_data, IMG_H * IMG_W * IMG_D * sizeof(float));
     caffe2::Predictor::TensorVector input_vec{&input};
     caffe2::Predictor::TensorVector output_vec;
     caffe2::Timer t;
+
     t.Start();
     _predictor->run(input_vec, &output_vec);
     float fps = 1000/t.MilliSeconds();
@@ -170,10 +171,9 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_CameraActivity_pred
     total_fps -= avg_fps;
 
 
-    constexpr int k = 5;
+    constexpr int k = 9;
     float max[k] = {0};
     int max_index[k] = {0};
-    // Find the top-k results manually.
     if (output_vec.capacity() > 0) {
         for (auto output : output_vec) {
             for (auto i = 0; i < output->size(); ++i) {
@@ -196,7 +196,7 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_CameraActivity_pred
     stringStream << avg_fps << " FPS\n";
 
     for (auto j = 0; j < k; ++j) {
-        stringStream << j << ": " << direction[max_index[j]] << " - " << max[j] * 100 << "%\n";
+        stringStream << j << ": " << actions[max_index[j]] << " - " << max[j] * 100 << "%\n";
     }
 
     jfieldID value = env->GetFieldID(javaClass, "value", "I");

@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_action_refresh"
+        app:showAsAction="never"
+        />
+
+
+    <item android:id="@+id/action_connection_status"
+        android:title="@string/action_settings"
+        android:orderInCategory="2"
+        android:icon="@drawable/ic_status_disconnected"
+        app:showAsAction="always"
+        />
+
+
+</menu>
