@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -125,6 +126,8 @@ public class BLEScanActivity extends AppCompatActivity {
 
         connectingProgressBar = (ProgressBar) findViewById(R.id.connecting_progress_bar);
         connectingTextView = (TextView) findViewById(R.id.connecting_text_view);
+        connectingTextView.setTextColor(Color.rgb(255, 165, 0));
+        connectingProgressBar.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 165, 0), PorterDuff.Mode.MULTIPLY);
 
         FrameLayout connectingFrameLayout = (FrameLayout) findViewById(R.id.connecting_frame_layout);
         connectingFrameLayout.bringToFront();
