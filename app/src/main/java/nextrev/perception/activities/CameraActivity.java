@@ -61,6 +61,7 @@ public class CameraActivity extends Activity {
     private AssetManager mgr;
     private boolean processing = false;
     private Image image = null;
+    private ImageReader reader;
 
     Prediction prediction;
 
@@ -197,7 +198,7 @@ public class CameraActivity extends Activity {
             Surface surface = new Surface(texture);
             int width = 128;
             int height = 128;
-            ImageReader reader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 4);
+            reader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 4);
             ImageReader.OnImageAvailableListener readerListener = new ImageReader.OnImageAvailableListener() {
                 @Override
                 public void onImageAvailable(ImageReader reader) {

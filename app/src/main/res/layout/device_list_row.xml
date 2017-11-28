@@ -11,14 +11,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="3dip"
-        android:layout_alignParentLeft="true"
-        android:layout_marginRight="5dip">
+        android:layout_alignParentStart="true"
+        android:layout_marginEnd="5dip"
+        >
 
         <ImageView
             android:id="@+id/connection_status"
             android:layout_width="30dip"
             android:layout_height="30dip"
-            android:src="@drawable/ic_status_disconnected"/>
+            android:src="@drawable/ic_status_disconnected"
+            android:contentDescription="@string/connection_status" />
 
     </LinearLayout>
 
@@ -28,11 +30,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/thumbnail"
-        android:layout_toRightOf="@+id/thumbnail"
+        android:layout_toEndOf="@+id/thumbnail"
         android:text=""
         android:textColor="#040404"
         android:typeface="sans"
-        android:textSize="15dip"
+        android:textSize="15sp"
         android:textStyle="bold"
         />
 
@@ -43,9 +45,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/name"
         android:textColor="#343434"
-        android:textSize="10dip"
+        android:textSize="12sp"
         android:layout_marginTop="1dip"
-        android:layout_toRightOf="@+id/thumbnail"
+        android:layout_toEndOf="@+id/thumbnail"
         android:text=""
         />
 

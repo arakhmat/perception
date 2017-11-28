@@ -1,7 +1,6 @@
 package nextrev.perception.activities;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -15,13 +14,10 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -31,8 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -96,7 +90,6 @@ public class BLEScanActivity extends AppCompatActivity {
             finish();
         }
         BluetoothManager mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        appContext.setBluetoothManager(mBluetoothManager);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
 
         deviceMap = new HashMap<>();
@@ -304,10 +297,6 @@ public class BLEScanActivity extends AppCompatActivity {
         connectingTextView.setVisibility(View.VISIBLE);
         appContext.disconnect();
         appContext.setBluetoothGatt(device.connectGatt(this, false, gattCallback));
-
-//        SharedPreferences mPrefs = getSharedPreferences("label", 0);
-//        SharedPreferences.Editor mEditor = mPrefs.edit();
-//        mEditor.putString("tag", device.getAddress()).commit();
     }
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
@@ -318,7 +307,7 @@ public class BLEScanActivity extends AppCompatActivity {
                 public void run() {
                     connectingProgressBar.setVisibility(View.INVISIBLE);
                     connectingTextView.setVisibility(View.INVISIBLE);
-                    for (HashMap device : deviceList) {
+                    for (HashMap<String, String> device : deviceList) {
                         if (device.get(KEY_ADDRESS).equals(gatt.getDevice().getAddress())) {
                             device.put(KEY_CONNECTION_STATUS,
                                     connectionStatus == BluetoothProfile.STATE_CONNECTED

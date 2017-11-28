@@ -14,24 +14,14 @@ public class Perception extends Application {
 
     final private static String TAG = "Perception";
 
-    private BluetoothManager mBluetoothManager;
     private BluetoothGatt mGatt;
     private boolean flashlightOn;
     private boolean isConnected;
 
     public Perception () {
-        mBluetoothManager = null;
         mGatt = null;
         flashlightOn = false;
         isConnected = false;
-    }
-
-    public BluetoothManager getBluetoothManager() {
-        return mBluetoothManager;
-    }
-
-    public void setBluetoothManager(BluetoothManager mBluetoothManager) {
-        this.mBluetoothManager = mBluetoothManager;
     }
 
     public BluetoothGatt getBluetoothGatt() {
@@ -40,9 +30,7 @@ public class Perception extends Application {
 
     public void setBluetoothGatt(BluetoothGatt mGatt) { this.mGatt = mGatt; }
 
-    public boolean flashlightOn() {
-        return flashlightOn;
-    }
+    public boolean flashlightOn() { return flashlightOn; }
 
     public void toggleFlashlight() {
         this.flashlightOn = !this.flashlightOn;
@@ -65,8 +53,8 @@ public class Perception extends Application {
     }
 
     public void sendPredictionToArduino(String value) {
-        if (mBluetoothManager == null || mGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+        if (mGatt == null) {
+            Log.w(TAG, "There is no BLE device connected");
             return;
         }
 

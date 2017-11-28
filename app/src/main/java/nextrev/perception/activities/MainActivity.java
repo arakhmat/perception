@@ -76,11 +76,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (appContext.flashlightOn()) {
-                    flashlightButton.setText("Turn On");
+                    flashlightButton.setText(R.string.turn_on);
                     flashlightImageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_status_disconnected));
                 }
                 else {
-                    flashlightButton.setText("Turn Off");
+                    flashlightButton.setText(R.string.turn_off);
                     flashlightImageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_status_connected));
                 }
                 appContext.toggleFlashlight();
@@ -93,50 +93,19 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         if (appContext.isConnected()) {
-            connectButton.setText("Search");
+            connectButton.setText(R.string.search);
             connectImageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_status_connected));
             String deviceName = appContext.getBluetoothGatt().getDevice().getName();
             if (deviceName == null)
-                deviceName = "Unknown Name";
+                deviceName = getBaseContext().getString(R.string.unknown_name);
             nameTextView.setText(deviceName);
             addressTextView.setText(appContext.getBluetoothGatt().getDevice().getAddress());
         }
         else {
-            connectButton.setText("Connect");
+            connectButton.setText(R.string.connect);
             connectImageView.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_status_disconnected));
-            nameTextView.setText("N/A");
-            addressTextView.setText("N/A");
+            nameTextView.setText(R.string.n_a);
+            addressTextView.setText(R.string.n_a);
         }
     }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.main_activity_actions, menu);
-//        return super.onCreateOptionsMenu(menu);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-////        switch (item.getItemId()) {
-////            case R.id.action_refresh:
-////                devicesMap.clear();
-////                devicesList.clear();
-////                for (int j = 0; j < devicesListView.getChildCount(); j++) {
-////                    TextView child = (TextView) devicesListView.getChildAt(j);
-////                    child.setTextColor(Color.BLACK);
-////                    child.setBackgroundColor(Color.TRANSPARENT);
-////                }
-////                BluetoothGatt mGatt = appContext.getBluetoothGatt();
-////                if (mGatt != null) {
-////                    mGatt.close();
-////                    appContext.setBluetoothGatt(null);
-////                }
-////                scanLeDevice(true);
-////                break;
-////            default:
-////                break;
-////        }
-//        return true;
-//    }
 }

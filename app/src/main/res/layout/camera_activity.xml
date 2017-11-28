@@ -19,7 +19,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="#AA000000"
-        android:text="Loading..."
+        android:text="@string/loading"
         android:textAllCaps="true"
         android:textColor="@android:color/white"
         android:textStyle="bold"

@@ -145,13 +145,6 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
             input_data[r_i] = (input_data[r_i] + 128) / 255;
             input_data[g_i] = (input_data[g_i] + 128) / 255;
             input_data[b_i] = (input_data[b_i] + 128) / 255;
-
-//            if (i == iter_h - 1 && j == iter_w - 1) {
-//                alog("%f %f %f\n", input_data[r_i],   input_data[g_i],   input_data[b_i]);
-//                alog("%f %f %f\n", input_data[r_i_1], input_data[g_i_1], input_data[b_i_1]);
-//                alog("%f %f %f\n", input_data[r_i_2], input_data[g_i_2], input_data[b_i_2]);
-//            }
-
         }
     }
 
@@ -171,25 +164,23 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
     total_fps -= avg_fps;
 
 
-    constexpr int k = 9;
+    constexpr int k = 3;
     float max[k] = {0};
     int max_index[k] = {0};
-    if (output_vec.capacity() > 0) {
-        for (auto output : output_vec) {
-            for (auto i = 0; i < output->size(); ++i) {
-                for (auto j = 0; j < k; ++j) {
-                    if (output->template data<float>()[i] > max[j]) {
-                        for (auto _j = k - 1; _j > j; --_j) {
-                            max[_j - 1] = max[_j];
-                            max_index[_j - 1] = max_index[_j];
-                        }
-                        max[j] = output->template data<float>()[i];
-                        max_index[j] = i;
-                        goto skip;
+    for (auto output : output_vec) {
+        for (auto i = 0; i < output->size(); i++) {
+            for (auto j = 0; j < k; j++) {
+                if (output->template data<float>()[i] > max[j]) {
+                    for (auto _j = k - 1; _j > j; --_j) {
+                        max[_j - 1] = max[_j];
+                        max_index[_j - 1] = max_index[_j];
                     }
+                    max[j] = output->template data<float>()[i];
+                    max_index[j] = i;
+                    goto skip;
                 }
-                skip:;
             }
+            skip:;
         }
     }
     std::ostringstream stringStream;
