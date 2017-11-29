@@ -60,6 +60,7 @@ public class Perception extends Application {
 
         BluetoothGattService mCustomService = mGatt.getService(UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB"));
         if(mCustomService == null){
+            /* HM-10 SERVICE 3 - CUSTOM SERVICE */
             Log.w(TAG, "Custom BLE Service not found \"0000FFE0-0000-1000-8000-00805F9B34FB\"");
             return;
         }
@@ -68,6 +69,7 @@ public class Perception extends Application {
         mWriteCharacteristic.setValue(value + '\n');
 
         if(!mGatt.writeCharacteristic(mWriteCharacteristic)){
+            /* HM-10 CUSTOM CHARACTERISTIC of SERVICE 3 */
             Log.w(TAG, "Failed to write characteristic \"0000FFE1-0000-1000-8000-00805F9B34FB\"");
         }
     }
