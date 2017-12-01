@@ -29,7 +29,7 @@ static float input_data[MAX_DATA_SIZE];
 static caffe2::Workspace ws;
 
 const char * actions[] {
-        "NW", "W", "SW", "N", "Stand", "S", "NE", "E", "SE"
+        "NW", "W", "SW", "N", "Stand", "S", "NE", "E", "SE", "Undefined"
 };
 
 void loadCaffe2Net(AAssetManager* mgr, caffe2::NetDef* net, const char *filename) {
@@ -142,9 +142,9 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
             input_data[g_i] = -g_mean + (float) ((float) min(255., max(0., (float) (y - 0.34414 * (u - 128) - 0.71414 * (v - 128)))));
             input_data[b_i] = -b_mean + (float) ((float) min(255., max(0., (float) (y + 1.772 * (u - v)))));
 
-            input_data[r_i] = (input_data[r_i] + 128) / 255;
-            input_data[g_i] = (input_data[g_i] + 128) / 255;
-            input_data[b_i] = (input_data[b_i] + 128) / 255;
+            input_data[r_i] /= 128.0f;
+            input_data[g_i] /= 128.0f;
+            input_data[b_i] /= 128.0f;
         }
     }
 
