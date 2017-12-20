@@ -62,7 +62,7 @@ int iters_fps = 10;
 extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraActivity_predict(
         JNIEnv *env,
         jobject /* this */,
-        jint h, jint w, jbyteArray Y, jbyteArray U, jbyteArray V,
+        jint h, jint w, jbyteArray YUV,
         jint rowStride, jint pixelStride) {
 
     jclass javaClass = env->FindClass("nextrev/perception/Prediction");
@@ -73,21 +73,11 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
         return prediction;
     }
 
-    jsize Y_len = env->GetArrayLength(Y);
-    jbyte * Y_data = env->GetByteArrayElements(Y, 0);
-    assert(Y_len <= MAX_DATA_SIZE);
-    jsize U_len = env->GetArrayLength(U);
-    jbyte * U_data = env->GetByteArrayElements(U, 0);
-    assert(U_len <= MAX_DATA_SIZE);
-    jsize V_len = env->GetArrayLength(V);
-    jbyte * V_data = env->GetByteArrayElements(V, 0);
-    assert(V_len <= MAX_DATA_SIZE);
+    jsize YUV_len = env->GetArrayLength(YUV);
+    jbyte * YUV_data = env->GetByteArrayElements(YUV, 0);
 
 #define min(a,b) ((a) > (b)) ? (b) : (a)
 #define max(a,b) ((a) > (b)) ? (a) : (b)
-
-    auto h_offset = max(0, (h - IMG_H) / 2);
-    auto w_offset = max(0, (w - IMG_W) / 2);
 
     auto iter_h = IMG_H;
     auto iter_w = IMG_W;
@@ -97,38 +87,63 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
     if (w < IMG_W) {
         iter_w = w;
     }
+    alog("h and w: %d %d", h, w)
+    alog("iter_h and iter_w: %d %d", iter_h, iter_w)
 
-    for (auto i = 0; i < iter_h; ++i) {
-        jbyte* Y_row = &Y_data[(h_offset + i) * w];
-        jbyte* U_row = &U_data[(h_offset + i) / 4 * rowStride];
-        jbyte* V_row = &V_data[(h_offset + i) / 4 * rowStride];
-        for (auto j = 0; j < iter_w; ++j) {
-            // Tested on Pixel and S7.
-            char y = Y_row[w_offset + j];
-            char u = U_row[pixelStride * ((w_offset+j)/pixelStride)];
-            char v = V_row[pixelStride * ((w_offset+j)/pixelStride)];
+    int y_len = 25344;
+    int u_len = 6336;
+    int v_len = 6336;
 
-            float b_mean = 104.00698793f;
-            float g_mean = 116.66876762f;
-            float r_mean = 122.67891434f;
+    char Y[y_len];
+    for (auto i = 0; i < h; i++) {
+        for (auto j = 0; j < rowStride; j++) {
+            if (j >= w) continue;
+            Y[i * w + j] = YUV_data[i * rowStride + j];
+        }
+    }
+    char U[u_len];
+    for (auto i = 0; i < h / pixelStride; i++) {
+        for (auto j = 0; j < rowStride; j += pixelStride) {
+            int jj = j / 2;
+            if (jj < 8)
+                jj = w/pixelStride - (8 - jj);
+            else
+                jj -= 16;
+            if (jj >= w/pixelStride or jj < 0) continue;
+            U[i * w/pixelStride + jj] = YUV_data[27598 + i * rowStride + j];
+        }
+    }
 
-            auto b_i = 0 * IMG_H * IMG_W + j * IMG_W + i;
-            auto g_i = 1 * IMG_H * IMG_W + j * IMG_W + i;
-            auto r_i = 2 * IMG_H * IMG_W + j * IMG_W + i;
+    char V[v_len];
+    for (auto i = 0; i < h / pixelStride; i++) {
+        for (auto j = 0; j < rowStride; j += pixelStride) {
+            int jj;
+            if (j < 1)
+                jj = w / pixelStride - 1;
+            else
+                jj = j - 16;
+            jj = jj / 2;
+            if (jj >= w / pixelStride or jj < 0) continue;
+            V[i * w / pixelStride + jj] = YUV_data[41422 + i * rowStride + j];
+        }
+    }
 
-            auto b_i_1 = b_i + (IMG_H * IMG_W * IMG_C);
-            auto g_i_1 = g_i + (IMG_H * IMG_W * IMG_C);
-            auto r_i_1 = r_i + (IMG_H * IMG_W * IMG_C);
+    for (auto i = 0; i < IMG_H; i++) {
+        int ii = i * 1.375;
+        for (auto j = 0; j < IMG_W; j++) {
+            int jj = j * 1.125;
+
+            auto r_i = 0 * IMG_H * IMG_W + i * IMG_W  + (IMG_W - 1 - j);
+            auto g_i = 1 * IMG_H * IMG_W + i * IMG_W  + (IMG_W - 1 - j);
+            auto b_i = 2 * IMG_H * IMG_W + i * IMG_W  + (IMG_W - 1 - j);
+
+            auto b_i_1 = b_i + (IMG_C * IMG_H * IMG_W);
+            auto g_i_1 = g_i + (IMG_C * IMG_H * IMG_W);
+            auto r_i_1 = r_i + (IMG_C * IMG_H * IMG_W);
 //
-            auto b_i_2 = b_i + 2 * (IMG_H * IMG_W * IMG_C);
-            auto g_i_2 = g_i + 2 * (IMG_H * IMG_W * IMG_C);
-            auto r_i_2 = r_i + 2 * (IMG_H * IMG_W * IMG_C);
-
-/*
-  R = Y + 1.402 (V-128)
-  G = Y - 0.34414 (U-128) - 0.71414 (V-128)
-  B = Y + 1.772 (U-V)
- */
+            auto b_i_2 = b_i_1 + (IMG_C * IMG_H * IMG_W);
+            auto g_i_2 = g_i_1 + (IMG_C * IMG_H * IMG_W);
+            auto r_i_2 = r_i_1 + (IMG_C * IMG_H * IMG_W);
 
             input_data[r_i_2] = input_data[r_i_1];
             input_data[g_i_2] = input_data[g_i_1];
@@ -138,9 +153,20 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
             input_data[g_i_1] = input_data[g_i];
             input_data[b_i_1] = input_data[b_i];
 
-            input_data[r_i] = -r_mean + (float) ((float) min(255., max(0., (float) (y + 1.402 * (v - 128)))));
-            input_data[g_i] = -g_mean + (float) ((float) min(255., max(0., (float) (y - 0.34414 * (u - 128) - 0.71414 * (v - 128)))));
-            input_data[b_i] = -b_mean + (float) ((float) min(255., max(0., (float) (y + 1.772 * (u - v)))));
+            if (ii < 2) {
+                input_data[r_i] = Y[jj * w + ii] + 1.370705f * (V[jj/2 * w/2 + ii/2 + 1] - 128.0f);
+                input_data[g_i] = Y[jj * w + ii] - 0.337633f * (U[jj/2 * w/2 + ii/2 + 1] - 128.0f) - 0.698001f * (V[jj/2 * w/2 + ii/2 + 1] - 128.0f);
+                input_data[b_i] = Y[jj * w + ii] + 1.732446f * (U[jj/2 * w/2 + ii/2 + 1] - 128.0f);
+            }
+            else {
+                input_data[r_i] = Y[jj * w + ii] + 1.370705f * (V[jj/2 * w/2 + ii/2] - 128.0f);
+                input_data[g_i] = Y[jj * w + ii] - 0.337633f * (U[jj/2 * w/2 + ii/2] - 128.0f) - 0.698001f * (V[jj/2 * w/2 + ii/2] - 128.0f);
+                input_data[b_i] = Y[jj * w + ii] + 1.732446f * (U[jj/2 * w/2 + ii/2] - 128.0f);
+            }
+
+            input_data[r_i] = max(255.0f, min(0.0f, input_data[r_i])) - 128.0f;
+            input_data[g_i] = max(255.0f, min(0.0f, input_data[g_i])) - 128.0f;
+            input_data[b_i] = max(255.0f, min(0.0f, input_data[b_i])) - 128.0f;
 
             input_data[r_i] /= 128.0f;
             input_data[g_i] /= 128.0f;
@@ -148,9 +174,32 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
         }
     }
 
+    static int debug_idx = 0;
+    char debug_file[100];
+    sprintf(debug_file, "/sdcard/perception/debug_%04d.dat", debug_idx);
+    alog("%s", debug_file)
+    FILE* file = fopen(debug_file, "wb");
+    if (file != NULL)
+    {
+        alog("file stored successfully")
+        fwrite(input_data, sizeof(float), sizeof(input_data), file);
+        fclose(file);
+    }
+
+    sprintf(debug_file, "/sdcard/perception/YUV_%04d.dat", debug_idx);
+    alog("%s", debug_file)
+    file = fopen(debug_file, "wb");
+    if (file != NULL)
+    {
+        alog("file stored successfully")
+        fwrite(YUV_data, sizeof(char), 27632 + 13807 + 13807, file);
+        fclose(file);
+    }
+    debug_idx++;
+
     caffe2::TensorCPU input;
     input.Resize(std::vector<int>({1, IMG_D, IMG_H, IMG_W}));
-    memcpy(input.mutable_data<float>(), input_data, IMG_D * IMG_W * IMG_H * sizeof(float));
+    memcpy(input.mutable_data<float>(), input_data, IMG_D * IMG_H * IMG_W * sizeof(float));
 
     caffe2::Predictor::TensorVector input_vec{&input};
     caffe2::Predictor::TensorVector output_vec;

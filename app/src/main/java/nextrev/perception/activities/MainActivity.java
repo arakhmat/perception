@@ -1,6 +1,5 @@
 package nextrev.perception.activities;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -24,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView connectImageView;
     private ImageView flashlightImageView;
 
-
     private TextView nameTextView;
     private TextView addressTextView;
 
@@ -33,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        appContext = ((Perception) this.getApplication());
+        appContext = (Perception) this.getApplication();
 
         connectButton = (Button) findViewById(R.id.connect_button);
         flashlightButton = (Button) findViewById(R.id.flashlight_button);
@@ -45,20 +43,19 @@ public class MainActivity extends AppCompatActivity {
         nameTextView = (TextView) findViewById(R.id.name_text_view);
         addressTextView = (TextView) findViewById(R.id.address_text_view);
 
-
         /* Start the Game */
         cameraActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (appContext.isConnected()) {
+//                if (appContext.isConnected()) {
                     startActivity(new Intent(MainActivity.this, CameraActivity.class));
-                }
-                else {
-                    new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Error")
-                        .setMessage("Connect to Arduino first")
-                        .setPositiveButton("ok", null).show();
-                }
+//                }
+//                else {
+//                    new AlertDialog.Builder(MainActivity.this)
+//                        .setTitle("Error")
+//                        .setMessage("Connect to Arduino first")
+//                        .setPositiveButton("ok", null).show();
+//                }
             }
         });
 

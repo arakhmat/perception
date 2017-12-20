@@ -67,9 +67,7 @@ public class CameraActivity extends Activity {
 
     static { System.loadLibrary("native-lib");  }
     public native void initializeNeuralNetwork(AssetManager mgr);
-    public native Prediction predict(int h, int w,
-                                     byte[] Y, byte[] U, byte[] V,
-                                     int rowStride, int pixelStride);
+    public native Prediction predict(int h, int w, byte[] YUV, int rowStride, int pixelStride);
     private class SetUpNeuralNetwork extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void[] v) {
@@ -101,37 +99,6 @@ public class CameraActivity extends Activity {
 
         textureView = findViewById(R.id.textureView);
         textureView.setSystemUiVisibility(SYSTEM_UI_FLAG_IMMERSIVE);
-        final GestureDetector gestureDetector = new GestureDetector(this.getApplicationContext(),
-                new GestureDetector.SimpleOnGestureListener(){
-                    @Override
-                    public boolean onDoubleTap(MotionEvent e) {
-                        return true;
-                    }
-
-                    @Override
-                    public void onLongPress(MotionEvent e) {
-                        super.onLongPress(e);
-
-                    }
-
-                    @Override
-                    public boolean onDoubleTapEvent(MotionEvent e) {
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onDown(MotionEvent e) {
-                        return true;
-                    }
-                });
-
-        textureView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureDetector.onTouchEvent(event);
-            }
-        });
-
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         tv = findViewById(R.id.info_text);
@@ -212,25 +179,28 @@ public class CameraActivity extends Activity {
                         processing = true;
                         int w = image.getWidth();
                         int h = image.getHeight();
-                        ByteBuffer Ybuffer = image.getPlanes()[0].getBuffer();
-                        ByteBuffer Ubuffer = image.getPlanes()[1].getBuffer();
-                        ByteBuffer Vbuffer = image.getPlanes()[2].getBuffer();
+                        ByteBuffer YBuffer = image.getPlanes()[0].getBuffer();
+                        ByteBuffer UBuffer = image.getPlanes()[1].getBuffer();
+                        ByteBuffer VBuffer = image.getPlanes()[2].getBuffer();
 
                         int rowStride = image.getPlanes()[1].getRowStride();
                         int pixelStride = image.getPlanes()[1].getPixelStride();
-                        byte[] Y = new byte[Ybuffer.capacity()];
-                        byte[] U = new byte[Ubuffer.capacity()];
-                        byte[] V = new byte[Vbuffer.capacity()];
-                        Ybuffer.get(Y);
-                        Ubuffer.get(U);
-                        Vbuffer.get(V);
+                        byte[] YUV = new byte[YBuffer.capacity() + UBuffer.capacity() + VBuffer.capacity()];
 
-                        prediction = predict(h, w, Y, U, V,
-                                rowStride, pixelStride);
+                        YBuffer.get(YUV, 0, YBuffer.capacity());
+                        UBuffer.get(YUV, YBuffer.capacity(), UBuffer.capacity());
+                        VBuffer.get(YUV, YBuffer.capacity() + UBuffer.capacity(), VBuffer.capacity());
+
+                        Log.d(TAG, "H and W: " + h + " " + w);
+                        Log.d(TAG, "Y rowStride and pixelStride: " + image.getPlanes()[0].getRowStride() + " " + image.getPlanes()[0].getPixelStride());
+                        Log.d(TAG, "U rowStride and pixelStride: " + image.getPlanes()[1].getRowStride() + " " + image.getPlanes()[1].getPixelStride());
+                        Log.d(TAG, "V rowStride and pixelStride: " + image.getPlanes()[2].getRowStride() + " " + image.getPlanes()[2].getPixelStride());
+                        Log.d(TAG, "Y, U and V lengths: " + YBuffer.capacity() + " " + UBuffer.capacity() + " " + VBuffer.capacity());
+
+                        prediction = predict(h, w, YUV, rowStride, pixelStride);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-//                                Log.d(TAG, "Sending prediction " + prediction.getValue());
                                 tv.setText(prediction.getInfo());
                                 appContext.sendPredictionToArduino(Integer.toString(prediction.getValue()));
                                 processing = false;
