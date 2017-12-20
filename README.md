@@ -1,5 +1,5 @@
 # Perception
-Android application for controlling air hockey robot in real-time.
+Android application for controlling air hockey robot in real-time using Convolutional Neural Network.
 
 ### How it works
 The application infers action that the robot should take by looking at the last 3 frames obtained from the camera.
