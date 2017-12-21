@@ -73,36 +73,31 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
         return prediction;
     }
 
-    jsize YUV_len = env->GetArrayLength(YUV);
     jbyte * YUV_data = env->GetByteArrayElements(YUV, 0);
 
 #define min(a,b) ((a) > (b)) ? (b) : (a)
 #define max(a,b) ((a) > (b)) ? (a) : (b)
 
-    auto iter_h = IMG_H;
-    auto iter_w = IMG_W;
-    if (h < IMG_H) {
-        iter_h = h;
-    }
-    if (w < IMG_W) {
-        iter_w = w;
-    }
-    alog("h and w: %d %d", h, w)
-    alog("iter_h and iter_w: %d %d", iter_h, iter_w)
+/* Following code converts YUV to RGB only for Sony Xperia Aqua M4
+ * It most likely is not going to work on any other Android device */
 
-    int y_len = 25344;
-    int u_len = 6336;
-    int v_len = 6336;
+    int y_len = h * w;
+    int u_len = y_len / 4;
+    int v_len = y_len / 4;
 
-    char Y[y_len];
+    int u_start = 27598;
+    int v_start = 41422;
+
+    unsigned char Y[y_len];
     for (auto i = 0; i < h; i++) {
         for (auto j = 0; j < rowStride; j++) {
             if (j >= w) continue;
             Y[i * w + j] = YUV_data[i * rowStride + j];
         }
     }
-    char U[u_len];
-    for (auto i = 0; i < h / pixelStride; i++) {
+
+    unsigned char U[u_len];
+    for (auto i = 0; i < h/pixelStride; i++) {
         for (auto j = 0; j < rowStride; j += pixelStride) {
             int jj = j / 2;
             if (jj < 8)
@@ -110,28 +105,28 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
             else
                 jj -= 16;
             if (jj >= w/pixelStride or jj < 0) continue;
-            U[i * w/pixelStride + jj] = YUV_data[27598 + i * rowStride + j];
+            U[i * w/pixelStride + jj] = YUV_data[u_start + i * rowStride + j];
         }
     }
 
-    char V[v_len];
-    for (auto i = 0; i < h / pixelStride; i++) {
-        for (auto j = 0; j < rowStride; j += pixelStride) {
+    unsigned char V[v_len];
+    for (auto i = 0; i < h/pixelStride; i++) {
+        for (auto j = 1; j < rowStride; j += pixelStride) {
             int jj;
             if (j < 1)
-                jj = w / pixelStride - 1;
+                jj = w/pixelStride - 1;
             else
                 jj = j - 16;
             jj = jj / 2;
-            if (jj >= w / pixelStride or jj < 0) continue;
-            V[i * w / pixelStride + jj] = YUV_data[41422 + i * rowStride + j];
+            if (jj >= w/pixelStride or jj < 0) continue;
+            V[i * w/pixelStride + jj] = YUV_data[v_start + i * rowStride + j];
         }
     }
 
     for (auto i = 0; i < IMG_H; i++) {
-        int ii = i * 1.375;
+        int ii = (int) ((float) i * 1.375f);
         for (auto j = 0; j < IMG_W; j++) {
-            int jj = j * 1.125;
+            int jj = (int) ((float) j * 1.125f);
 
             auto r_i = 0 * IMG_H * IMG_W + i * IMG_W  + (IMG_W - 1 - j);
             auto g_i = 1 * IMG_H * IMG_W + i * IMG_W  + (IMG_W - 1 - j);
@@ -140,7 +135,7 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
             auto b_i_1 = b_i + (IMG_C * IMG_H * IMG_W);
             auto g_i_1 = g_i + (IMG_C * IMG_H * IMG_W);
             auto r_i_1 = r_i + (IMG_C * IMG_H * IMG_W);
-//
+
             auto b_i_2 = b_i_1 + (IMG_C * IMG_H * IMG_W);
             auto g_i_2 = g_i_1 + (IMG_C * IMG_H * IMG_W);
             auto r_i_2 = r_i_1 + (IMG_C * IMG_H * IMG_W);
@@ -153,20 +148,22 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
             input_data[g_i_1] = input_data[g_i];
             input_data[b_i_1] = input_data[b_i];
 
-            if (ii < 2) {
-                input_data[r_i] = Y[jj * w + ii] + 1.370705f * (V[jj/2 * w/2 + ii/2 + 1] - 128.0f);
-                input_data[g_i] = Y[jj * w + ii] - 0.337633f * (U[jj/2 * w/2 + ii/2 + 1] - 128.0f) - 0.698001f * (V[jj/2 * w/2 + ii/2 + 1] - 128.0f);
-                input_data[b_i] = Y[jj * w + ii] + 1.732446f * (U[jj/2 * w/2 + ii/2 + 1] - 128.0f);
-            }
-            else {
-                input_data[r_i] = Y[jj * w + ii] + 1.370705f * (V[jj/2 * w/2 + ii/2] - 128.0f);
-                input_data[g_i] = Y[jj * w + ii] - 0.337633f * (U[jj/2 * w/2 + ii/2] - 128.0f) - 0.698001f * (V[jj/2 * w/2 + ii/2] - 128.0f);
-                input_data[b_i] = Y[jj * w + ii] + 1.732446f * (U[jj/2 * w/2 + ii/2] - 128.0f);
-            }
+            int uv_idx = jj/2 * w/2 + ii/2;
+            float y = (float) Y[jj * w + ii];
+            float u = (float) U[uv_idx];
+            float v = (float) V[uv_idx];
 
-            input_data[r_i] = max(255.0f, min(0.0f, input_data[r_i])) - 128.0f;
-            input_data[g_i] = max(255.0f, min(0.0f, input_data[g_i])) - 128.0f;
-            input_data[b_i] = max(255.0f, min(0.0f, input_data[b_i])) - 128.0f;
+            input_data[r_i] = y + 1.370705f * (v - 128.0f);
+            input_data[g_i] = y - 0.337633f * (u - 128.0f) - 0.698001f * (v - 128.0f);
+            input_data[b_i] = y + 1.732446f * (u - 128.0f);
+
+            input_data[r_i] = max(0.0f, min(255.0f, input_data[r_i]));
+            input_data[g_i] = max(0.0f, min(255.0f, input_data[g_i]));
+            input_data[b_i] = max(0.0f, min(255.0f, input_data[b_i]));
+
+            input_data[r_i] -= 128.0f;
+            input_data[g_i] -= 128.0f;
+            input_data[b_i] -= 128.0f;
 
             input_data[r_i] /= 128.0f;
             input_data[g_i] /= 128.0f;
@@ -174,28 +171,28 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
         }
     }
 
-    static int debug_idx = 0;
-    char debug_file[100];
-    sprintf(debug_file, "/sdcard/perception/debug_%04d.dat", debug_idx);
-    alog("%s", debug_file)
-    FILE* file = fopen(debug_file, "wb");
-    if (file != NULL)
-    {
-        alog("file stored successfully")
-        fwrite(input_data, sizeof(float), sizeof(input_data), file);
-        fclose(file);
-    }
-
-    sprintf(debug_file, "/sdcard/perception/YUV_%04d.dat", debug_idx);
-    alog("%s", debug_file)
-    file = fopen(debug_file, "wb");
-    if (file != NULL)
-    {
-        alog("file stored successfully")
-        fwrite(YUV_data, sizeof(char), 27632 + 13807 + 13807, file);
-        fclose(file);
-    }
-    debug_idx++;
+//    static int debug_idx = 0;
+//    char debug_file[100];
+//    sprintf(debug_file, "/sdcard/perception/debug_%04d.dat", debug_idx);
+//    alog("%s", debug_file)
+//    FILE* file = fopen(debug_file, "wb");
+//    if (file != NULL)
+//    {
+//        alog("file stored successfully")
+//        fwrite(input_data, sizeof(float), sizeof(input_data), file);
+//        fclose(file);
+//    }
+//
+//    sprintf(debug_file, "/sdcard/perception/YUV_%04d.dat", debug_idx);
+//    alog("%s", debug_file)
+//    file = fopen(debug_file, "wb");
+//    if (file != NULL)
+//    {
+//        alog("file stored successfully")
+//        fwrite(YUV_data, sizeof(char), 27632 + 13807 + 13807, file);
+//        fclose(file);
+//    }
+//    debug_idx++;
 
     caffe2::TensorCPU input;
     input.Resize(std::vector<int>({1, IMG_D, IMG_H, IMG_W}));
@@ -211,7 +208,6 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
     total_fps += fps;
     avg_fps = total_fps / iters_fps;
     total_fps -= avg_fps;
-
 
     constexpr int k = 3;
     float max[k] = {0};
@@ -235,9 +231,8 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
     std::ostringstream stringStream;
     stringStream << avg_fps << " FPS\n";
 
-    for (auto j = 0; j < k; ++j) {
+    for (auto j = 0; j < k; ++j)
         stringStream << j << ": " << actions[max_index[j]] << " - " << max[j] * 100 << "%\n";
-    }
 
     jfieldID value = env->GetFieldID(javaClass, "value", "I");
     jfieldID info = env->GetFieldID(javaClass, "info", "Ljava/lang/String;");

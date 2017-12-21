@@ -191,11 +191,11 @@ public class CameraActivity extends Activity {
                         UBuffer.get(YUV, YBuffer.capacity(), UBuffer.capacity());
                         VBuffer.get(YUV, YBuffer.capacity() + UBuffer.capacity(), VBuffer.capacity());
 
-                        Log.d(TAG, "H and W: " + h + " " + w);
-                        Log.d(TAG, "Y rowStride and pixelStride: " + image.getPlanes()[0].getRowStride() + " " + image.getPlanes()[0].getPixelStride());
-                        Log.d(TAG, "U rowStride and pixelStride: " + image.getPlanes()[1].getRowStride() + " " + image.getPlanes()[1].getPixelStride());
-                        Log.d(TAG, "V rowStride and pixelStride: " + image.getPlanes()[2].getRowStride() + " " + image.getPlanes()[2].getPixelStride());
-                        Log.d(TAG, "Y, U and V lengths: " + YBuffer.capacity() + " " + UBuffer.capacity() + " " + VBuffer.capacity());
+//                        Log.d(TAG, "H and W: " + h + " " + w);
+//                        Log.d(TAG, "Y rowStride and pixelStride: " + image.getPlanes()[0].getRowStride() + " " + image.getPlanes()[0].getPixelStride());
+//                        Log.d(TAG, "U rowStride and pixelStride: " + image.getPlanes()[1].getRowStride() + " " + image.getPlanes()[1].getPixelStride());
+//                        Log.d(TAG, "V rowStride and pixelStride: " + image.getPlanes()[2].getRowStride() + " " + image.getPlanes()[2].getPixelStride());
+//                        Log.d(TAG, "Y, U and V lengths: " + YBuffer.capacity() + " " + UBuffer.capacity() + " " + VBuffer.capacity());
 
                         prediction = predict(h, w, YUV, rowStride, pixelStride);
                         runOnUiThread(new Runnable() {
