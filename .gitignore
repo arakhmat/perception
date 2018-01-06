@@ -8,3 +8,5 @@
 /build
 /captures
 .externalNativeBuild
+app/src/main/assets/init_net.pb
+app/src/main/assets/predict_net.pb
