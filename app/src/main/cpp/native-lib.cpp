@@ -171,29 +171,6 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
         }
     }
 
-//    static int debug_idx = 0;
-//    char debug_file[100];
-//    sprintf(debug_file, "/sdcard/perception/debug_%04d.dat", debug_idx);
-//    alog("%s", debug_file)
-//    FILE* file = fopen(debug_file, "wb");
-//    if (file != NULL)
-//    {
-//        alog("file stored successfully")
-//        fwrite(input_data, sizeof(float), sizeof(input_data), file);
-//        fclose(file);
-//    }
-//
-//    sprintf(debug_file, "/sdcard/perception/YUV_%04d.dat", debug_idx);
-//    alog("%s", debug_file)
-//    file = fopen(debug_file, "wb");
-//    if (file != NULL)
-//    {
-//        alog("file stored successfully")
-//        fwrite(YUV_data, sizeof(char), 27632 + 13807 + 13807, file);
-//        fclose(file);
-//    }
-//    debug_idx++;
-
     caffe2::TensorCPU input;
     input.Resize(std::vector<int>({1, IMG_D, IMG_H, IMG_W}));
     memcpy(input.mutable_data<float>(), input_data, IMG_D * IMG_H * IMG_W * sizeof(float));
@@ -233,6 +210,30 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
 
     for (auto j = 0; j < k; ++j)
         stringStream << j << ": " << actions[max_index[j]] << " - " << max[j] * 100 << "%\n";
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//    static int debug_idx = 0;
+//    char debug_file[100];
+//    sprintf(debug_file, "/sdcard/perception/debug_%04d_%d.dat", debug_idx, max_index[0]);
+//    alog("%s", debug_file)
+//    FILE* file = fopen(debug_file, "wb");
+//    if (file != NULL)
+//    {
+//        alog("file stored successfully")
+//        fwrite(input_data, sizeof(float), sizeof(input_data), file);
+//        fclose(file);
+//    }
+//
+////    sprintf(debug_file, "/sdcard/perception/YUV_%04d.dat", debug_idx);
+////    alog("%s", debug_file)
+////    file = fopen(debug_file, "wb");
+////    if (file != NULL)
+////    {
+////        alog("file stored successfully")
+////        fwrite(YUV_data, sizeof(char), 27632 + 13807 + 13807, file);
+////        fclose(file);
+////    }
+//    debug_idx++;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     jfieldID value = env->GetFieldID(javaClass, "value", "I");
     jfieldID info = env->GetFieldID(javaClass, "info", "Ljava/lang/String;");
