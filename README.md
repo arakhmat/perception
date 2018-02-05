@@ -16,7 +16,7 @@ git clone https://github.com/arakhmat/perception
 ### Build
 Import the project to Android Studio and it will build automatically.
 ### Limitations
-* The application was tested only on Sony Xperia m4 Aqua. It most likely will not convert raw YUV data to RGB image correctly on any other device due to unusual format of YUV data on Xperia m4 Aqua.
+* The application was tested only on Sony Xperia m4 Aqua. It most likely will not convert raw YUV data to RGB image correctly on any other device due to an unusual format of YUV data on Xperia m4 Aqua.
 ## Acknowledgments
 * [AI Camera](https://github.com/bwasti/AICamera) - Demonstration of using Caffe2 inside an Android application
 * [Android Bluetooth Low Energy (BLE) Example](http://www.truiton.com/2015/04/android-bluetooth-low-energy-ble-example/)
