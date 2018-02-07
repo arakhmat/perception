@@ -104,6 +104,7 @@ if __name__ == '__main__':
 
             plt.pause(0.001)
 
+
         if DEBUG_YUV:
             yuv = array.array('b')
             with open(yuv_file, 'rb') as f:
