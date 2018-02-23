@@ -18,7 +18,7 @@ with labeled frames generated using [Air Hockey Game Simulator](https://github.c
 #### Ready to start
 <img src="https://github.com/arakhmat/perception/blob/master/images/ready.png" width="240" height="425">
 
-#### During the game
+#### During the game (Top prediction is to go southeast (bottom right) ☺)
 <img src="https://github.com/arakhmat/perception/blob/master/images/action.png" width="240" height="425">
 
 ### Prerequisites
