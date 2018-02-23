@@ -10,13 +10,14 @@ Predictions are made by using a convolutional neural network. The network is pre
 with labeled frames generated using [Air Hockey Game Simulator](https://github.com/arakhmat/air-hockey), and then trained via DDQN using [gym-air-hockey](https://github.com/arakhmat/gym-air-hockey) as the environment. Finally, the model is converted from keras to caffe2 using [keras-to-caffe2 converter](https://github.com/arakhmat/keras-to-caffe2).
 ### Screenshots
 #### Launched application
+<img src="https://github.com/arakhmat/perception/blob/master/images/start.png" width="240" height="425">
 ![start.png](https://github.com/arakhmat/perception/blob/master/images/start.png =240x425)
 #### Menu used to connect to a BLE device
-![connect.png](https://github.com/arakhmat/perception/blob/master/images/connect.png =240x425)
+<img src="https://github.com/arakhmat/perception/blob/master/images/connect.png" width="240" height="425">
 #### Ready to start
-![ready.png](https://github.com/arakhmat/perception/blob/master/images/ready.png =240x425)
+<img src="https://github.com/arakhmat/perception/blob/master/images/ready.png" width="240" height="425">
 #### During the game
-![action.png](https://github.com/arakhmat/perception/blob/master/images/action.png =240x425)
+<img src="https://github.com/arakhmat/perception/blob/master/images/action.png" width="240" height="425">
 ### Prerequisites
 [Android Studio](https://developer.android.com/studio/index.html)
 ### Download
