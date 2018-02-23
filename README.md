@@ -11,12 +11,16 @@ with labeled frames generated using [Air Hockey Game Simulator](https://github.c
 ### Screenshots
 #### Launched application
 <img src="https://github.com/arakhmat/perception/blob/master/images/start.png" width="240" height="425">
+
 #### Menu used to connect to a BLE device
 <img src="https://github.com/arakhmat/perception/blob/master/images/connect.png" width="240" height="425">
+
 #### Ready to start
 <img src="https://github.com/arakhmat/perception/blob/master/images/ready.png" width="240" height="425">
+
 #### During the game
 <img src="https://github.com/arakhmat/perception/blob/master/images/action.png" width="240" height="425">
+
 ### Prerequisites
 [Android Studio](https://developer.android.com/studio/index.html)
 ### Download
