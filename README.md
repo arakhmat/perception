@@ -11,7 +11,6 @@ with labeled frames generated using [Air Hockey Game Simulator](https://github.c
 ### Screenshots
 #### Launched application
 <img src="https://github.com/arakhmat/perception/blob/master/images/start.png" width="240" height="425">
-![start.png](https://github.com/arakhmat/perception/blob/master/images/start.png =240x425)
 #### Menu used to connect to a BLE device
 <img src="https://github.com/arakhmat/perception/blob/master/images/connect.png" width="240" height="425">
 #### Ready to start
