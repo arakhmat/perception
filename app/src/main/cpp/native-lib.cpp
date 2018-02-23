@@ -186,41 +186,65 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
     avg_fps = total_fps / iters_fps;
     total_fps -= avg_fps;
 
-    constexpr int k = 3;
-    float max[k] = {0};
-    int max_index[k] = {0};
+    // Extract the output of the neural network
+    float values[10];
     for (auto output : output_vec) {
         for (auto i = 0; i < output->size(); i++) {
-            for (auto j = 0; j < k; j++) {
-                if (output->template data<float>()[i] > max[j]) {
-                    for (auto _j = k - 1; _j > j; --_j) {
-                        max[_j - 1] = max[_j];
-                        max_index[_j - 1] = max_index[_j];
-                    }
-                    max[j] = output->template data<float>()[i];
-                    max_index[j] = i;
-                    goto skip;
-                }
-            }
-            skip:;
+            values[i] =  output->template data<float>()[i];
+//            alog("%d %f", i, values[i])
         }
     }
+
+    // Find top 3 output
+    constexpr int n_max = 3;
+    float max_values[n_max];
+    int max_indices[n_max];
+    for (auto i = 0; i < n_max; i++) {
+        max_values[i] = -std::numeric_limits<float>::infinity();
+        max_indices[i] = 0;
+//        alog("%d %f %d\n", i, max_values[i], max_indices[i])
+//        alog("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        // Go through output and find the current max
+        for (auto j = 0; j < 10; j++) {
+//            alog("%d %f", j, values[j])
+            if (values[j] > max_values[i]) {
+                max_values[i] = values[j];
+                max_indices[i] = j;
+            }
+        }
+//        alog("++++++++++++++++++++++++++++++++++++++++")
+//        alog("%d %f %d\n", i, max_values[i], max_indices[i])
+//        alog("*****************************************")
+        // Set current max to negative infinity so that it won't be used on the next iteration
+        values[max_indices[i]] =  -std::numeric_limits<float>::infinity();
+//        for (auto j = 0; j < 10; j++) {
+//            alog("%d %f", j, values[j])
+//        }
+//        alog("########################################")
+
+    }
+
     std::ostringstream stringStream;
     stringStream << avg_fps << " FPS\n";
 
-    for (auto j = 0; j < k; ++j)
-        stringStream << j << ": " << actions[max_index[j]] << " - " << max[j] * 100 << "%\n";
+    for (auto j = 0; j < n_max; ++j) {
+        stringStream << j << ": " << actions[max_indices[j]] << " = " << max_values[j] << "\n";
+//        alog("Max Values %d %f", j, max_values[j])
+    }
+//    alog("-----------------------------------")
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //    static int debug_idx = 0;
 //    char debug_file[100];
-//    sprintf(debug_file, "/sdcard/perception/debug_%04d_%d.dat", debug_idx, max_index[0]);
+//    sprintf(debug_file, "/sdcard/perception/debug_%04d", debug_idx);
 //    alog("%s", debug_file)
 //    FILE* file = fopen(debug_file, "wb");
 //    if (file != NULL)
 //    {
-//        alog("file stored successfully")
-//        fwrite(input_data, sizeof(float), sizeof(input_data), file);
+//        fwrite(input_data,  sizeof(float), 9*128*128, file);
+//        fwrite(max_values,  sizeof(float),         3, file);
+//        fwrite(max_indices, sizeof(int),           3, file);
 //        fclose(file);
+//        alog("file stored successfully")
 //    }
 //
 ////    sprintf(debug_file, "/sdcard/perception/YUV_%04d.dat", debug_idx);
@@ -237,7 +261,7 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
 
     jfieldID value = env->GetFieldID(javaClass, "value", "I");
     jfieldID info = env->GetFieldID(javaClass, "info", "Ljava/lang/String;");
-    env->SetIntField(prediction, value, max_index[0]);
+    env->SetIntField(prediction, value, max_indices[0]);
     env->SetObjectField(prediction, info, env->NewStringUTF(stringStream.str().c_str()));
     return prediction;
 }
