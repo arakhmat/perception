@@ -1,12 +1,21 @@
 # Perception
-Android application for controlling air hockey robot in real-time using Convolutional Neural Network.
+Android application for controlling air hockey robot in real-time using Convolutional Neural Network (Submodule of [Deep Learning Air Hockey Robot](https://github.com/arakhmat/41X))
 
 ### How it works
-The application infers action that the robot should take by looking at the last 3 frames obtained from the camera.
-Then, it sends the inferred action to Arduino via Bluetooth LE.  
+The application infers action that the robot should take by looking at the last 3 frames captured by the camera.
+Then, the inferred action is sent to Arduino via Bluetooth LE.
 
 Predictions are made by using a convolutional neural network. The network is pretrained 
-with labeled frames generated using [Air Hockey Game Simulator](https://github.com/arakhmat/air-hockey), and then trained via reinforcement learning techniques using [gym-air-hockey](https://github.com/arakhmat/gym-air-hockey) as environment. Finally, the model is converted from keras to caffe2 using [keras-to-caffe2 converter](https://github.com/arakhmat/keras-to-caffe2).
+with labeled frames generated using [Air Hockey Game Simulator](https://github.com/arakhmat/air-hockey), and then trained via DDQN using [gym-air-hockey](https://github.com/arakhmat/gym-air-hockey) as the environment. Finally, the model is converted from keras to caffe2 using [keras-to-caffe2 converter](https://github.com/arakhmat/keras-to-caffe2).
+### Screenshots
+#### Launched Application
+![alt text](https://github.com/arakhmat/perception/blob/master/images/start.png)
+#### Menu used to connect to a BLE device
+![alt text](https://github.com/arakhmat/perception/blob/master/images/connect.png)
+#### Ready to start
+![alt text](https://github.com/arakhmat/perception/blob/master/images/ready.png)
+#### During the game
+![alt text](https://github.com/arakhmat/perception/blob/master/images/action.png)
 ### Prerequisites
 [Android Studio](https://developer.android.com/studio/index.html)
 ### Download
