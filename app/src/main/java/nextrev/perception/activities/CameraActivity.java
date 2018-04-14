@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -36,6 +37,7 @@ import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import nextrev.perception.Perception;
 import nextrev.perception.Prediction;
@@ -170,12 +172,12 @@ public class CameraActivity extends Activity {
                 @Override
                 public void onImageAvailable(ImageReader reader) {
                     try {
-
                         image = reader.acquireNextImage();
                         if (processing) {
                             image.close();
                             return;
                         }
+
                         processing = true;
                         int w = image.getWidth();
                         int h = image.getHeight();
@@ -221,6 +223,21 @@ public class CameraActivity extends Activity {
             if (appContext.flashlightOn()) {
                 captureRequestBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
             }
+
+//            captureRequestBuilder.set(CaptureRequest.EDGE_MODE,
+//                    CaptureRequest.EDGE_MODE_OFF);
+//            captureRequestBuilder.set(
+//                    CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,
+//                    CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);
+//            captureRequestBuilder.set(
+//                    CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
+//                    CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
+//            captureRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE,
+//                    CaptureRequest.NOISE_REDUCTION_MODE_OFF);
+//            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,
+//                    CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
+//            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_LOCK, true);
+//            captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_LOCK, true);
 
             cameraDevice.createCaptureSession(Arrays.asList(surface, reader.getSurface()), new CameraCaptureSession.StateCallback(){
                 @Override

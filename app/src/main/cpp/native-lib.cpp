@@ -58,12 +58,15 @@ extern "C" void Java_nextrev_perception_activities_CameraActivity_initializeNeur
 float avg_fps = 0.0;
 float total_fps = 0.0;
 int iters_fps = 10;
+int call_count = 0;
 
 extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraActivity_predict(
         JNIEnv *env,
         jobject /* this */,
         jint h, jint w, jbyteArray YUV,
         jint rowStride, jint pixelStride) {
+
+    call_count++;
 
     jclass javaClass = env->FindClass("nextrev/perception/Prediction");
     jmethodID constructor = env->GetMethodID(javaClass, "<init>", "()V");
@@ -195,8 +198,8 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
         }
     }
 
-    // Find top 3 output
-    constexpr int n_max = 3;
+    // Find top outputs
+    constexpr int n_max = 10;
     float max_values[n_max];
     int max_indices[n_max];
     for (auto i = 0; i < n_max; i++) {
@@ -226,6 +229,7 @@ extern "C" JNIEXPORT jobject JNICALL Java_nextrev_perception_activities_CameraAc
 
     std::ostringstream stringStream;
     stringStream << avg_fps << " FPS\n";
+    stringStream << call_count << " calls\n";
 
     for (auto j = 0; j < n_max; ++j) {
         stringStream << j << ": " << actions[max_indices[j]] << " = " << max_values[j] << "\n";
